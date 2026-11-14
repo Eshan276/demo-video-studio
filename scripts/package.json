@@ -1,0 +1,9 @@
+{
+  "name": "demo-video-studio-scripts",
+  "private": true,
+  "type": "module",
+  "description": "Recording kit, subtitle compositor and voice-over studio for product demo videos",
+  "dependencies": {
+    "puppeteer-core": "^25.16.0"
+  }
+}
