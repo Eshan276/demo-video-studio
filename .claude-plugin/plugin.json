@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin.json",
+  "name": "demo-video-studio",
+  "displayName": "Demo Video Studio",
+  "version": "1.0.0",
+  "description": "Product demo videos from your real, running app: burned-in subtitles, then your own voice-over recorded in a local studio that re-times every scene to your reading.",
+  "author": { "name": "Eshan Das", "url": "https://github.com/Eshan276" },
+  "homepage": "https://github.com/Eshan276/demo-video-studio",
+  "repository": "https://github.com/Eshan276/demo-video-studio",
+  "license": "MIT",
+  "keywords": ["demo-video", "voiceover", "subtitles", "screen-recording", "puppeteer", "ffmpeg", "hackathon", "product-demo"]
+}

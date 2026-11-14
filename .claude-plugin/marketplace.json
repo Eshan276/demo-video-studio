@@ -1,0 +1,14 @@
+{
+  "name": "eshan276-skills",
+  "description": "Skills by Eshan Das for shipping and showing off what you build",
+  "owner": { "name": "Eshan Das", "url": "https://github.com/Eshan276" },
+  "plugins": [
+    {
+      "name": "demo-video-studio",
+      "source": "./",
+      "description": "Demo videos from your real app with burned-in subtitles, plus a local voice-over studio that re-times every scene to your voice",
+      "category": "productivity",
+      "keywords": ["demo-video", "voiceover", "subtitles", "screen-recording"]
+    }
+  ]
+}
