@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Voice-over studio</title>
+<style>
+  :root { --paper:#f8f7f4; --paper2:#f1efea; --paper3:#e9e6df; --ink:#0b0a09; --ink2:#2b2724; --soft:#6e655d; --faint:#a39b92; --line:#e3dfd8; --strong:#cfc9bf; --live:#16a34a; --warn:#b45309; --rec:#dc2626; }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { background: var(--paper); color: var(--ink); font-family: 'Inter', 'Segoe UI', 'Helvetica Neue', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  .mono { font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace; }
+  .page { max-width: 1360px; margin: 0 auto; padding: 28px 32px 48px; }
+  header { display: flex; align-items: baseline; gap: 14px; margin-bottom: 22px; }
+  header .wm { font-size: 24px; letter-spacing: -.02em; }
+  header .wm small { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11px; color: var(--soft); margin-left: 6px; }
+  header h1 { font-size: 22px; font-weight: 400; letter-spacing: -.02em; color: var(--soft); }
+  header .count { margin-left: auto; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 13px; color: var(--soft); }
+  .grid { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 24px; align-items: start; }
+  video { width: 100%; aspect-ratio: 16/9; background: var(--ink); display: block; border: 1px solid var(--line); }
+  .panel { border: 1px solid var(--line); background: var(--paper); padding: 26px 28px; margin-top: 16px; }
+  .eyebrow { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; color: var(--soft); display: flex; align-items: center; gap: 12px; letter-spacing: .02em; }
+  .eyebrow::before { content: ''; width: 28px; height: 1px; background: var(--faint); }
+  .aim { margin-top: 10px; font-size: 15px; color: var(--ink2); }
+  .aim span { color: var(--soft); }
+  .text { margin-top: 14px; font-size: 32px; line-height: 1.25; letter-spacing: -.02em; text-wrap: balance; }
+  .row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 22px; }
+  button { font: inherit; cursor: pointer; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; height: 46px; padding: 0 20px; border-radius: 999px; border: 1px solid var(--strong); background: var(--paper); color: var(--ink); font-size: 15px; font-weight: 500; transition: background .15s, transform .15s; }
+  .btn:hover { background: var(--paper2); }
+  .btn.ink { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .btn.ink:hover { transform: translateY(-1px); background: var(--ink); }
+  .btn.rec { background: var(--rec); border-color: var(--rec); color: #fff; }
+  .btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+  .btn:focus-visible, .item:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: currentColor; display: inline-block; }
+  .rec .dot { animation: pulse 1s ease-in-out infinite; }
+  @keyframes pulse { 50% { opacity: .3; } }
+  audio { height: 40px; }
+  .bar { position: relative; height: 6px; background: var(--paper3); margin-top: 18px; overflow: hidden; }
+  .bar i { position: absolute; inset: 0 auto 0 0; background: var(--ink); transition: width .1s linear; }
+  .bar i.over { background: var(--warn); }
+  .bar b { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--live); }
+  .barlbl { display: flex; justify-content: space-between; margin-top: 6px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; color: var(--soft); }
+  .verdict { margin-top: 14px; font-size: 15px; }
+  .verdict.ok { color: var(--live); } .verdict.warn { color: var(--warn); }
+  .help { margin-top: 16px; font-size: 14px; line-height: 1.6; color: var(--soft); }
+  .help kbd { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; border: 1px solid var(--strong); padding: 1px 6px; background: var(--paper2); }
+  .err { margin-bottom: 14px; padding: 10px 14px; border: 1px solid var(--rec); color: var(--rec); background: #fef2f2; font-size: 14px; }
+  aside { border: 1px solid var(--line); background: var(--paper); position: sticky; top: 20px; max-height: calc(100dvh - 40px); display: flex; flex-direction: column; }
+  aside .head { padding: 14px 18px; border-bottom: 1px solid var(--line); font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; color: var(--soft); display: flex; justify-content: space-between; }
+  aside ol { list-style: none; padding: 0; overflow-y: auto; flex: 1; }
+  .item { display: grid; grid-template-columns: 28px 1fr auto; gap: 10px; width: 100%; text-align: left; padding: 12px 18px; border: 0; border-bottom: 1px solid var(--line); background: transparent; font-size: 14px; line-height: 1.4; color: var(--ink2); }
+  .item:hover { background: var(--paper2); }
+  .item.cur { background: var(--paper3); color: var(--ink); }
+  .item .n, .item .s { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; color: var(--faint); padding-top: 2px; }
+  .item .s.done { color: var(--live); }
+  .item .t { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  aside .foot { padding: 14px 18px; border-top: 1px solid var(--line); font-size: 13px; color: var(--soft); line-height: 1.5; }
+  @media (max-width: 1000px) { .grid { grid-template-columns: 1fr; } aside { position: static; max-height: none; } }
+  @media (prefers-reduced-motion: reduce) { .rec .dot { animation: none; } .bar i { transition: none; } }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <span class="wm" id="brand">Demo<small>voice-over</small></span>
+    <h1>Voice-over studio</h1>
+    <span class="count" id="count"></span>
+  </header>
+  <div id="err" class="err" role="alert" hidden></div>
+  <div class="grid">
+    <section>
+      <video id="video" src="/video.mp4" muted playsinline preload="auto"></video>
+      <div class="panel">
+        <p class="eyebrow" id="meta"></p>
+        <p class="aim" id="aim"></p>
+        <p class="text" id="text"></p>
+        <div class="row" id="controls"></div>
+        <div id="progress" hidden>
+          <div class="bar"><i id="fill"></i><b id="mark"></b></div>
+          <div class="barlbl"><span>0s</span><span id="hint"></span></div>
+        </div>
+        <p class="verdict" id="verdict" hidden></p>
+        <p class="help">
+          <kbd>Space</kbd> starts and stops recording. <kbd>←</kbd> <kbd>→</kbd> move between lines. The scene plays silently while you read so you can follow it.
+          Each take saves straight into <span class="mono" id="vodir">the vo/ folder</span>. The timer is a guide, not a limit: the video is re-timed to your voice and silence at the edges is trimmed.
+        </p>
+      </div>
+    </section>
+    <aside>
+      <div class="head"><span>Script</span><span id="total"></span></div>
+      <ol id="list"></ol>
+      <div class="foot">When every line has a take, tell Claude: it checks the takes and builds the voiced video with <span class="mono">compose-vo.mjs</span>.</div>
+    </aside>
+  </div>
+</div>
+<script>
+const $ = (id) => document.getElementById(id);
+const nn = (n) => String(n).padStart(2, '0');
+const range = (aim) => [Math.max(2, aim - 1), aim + 2];
+const fit = (secs, aim) => {
+  const [lo, hi] = range(aim);
+  if (secs < lo) return ['warn', 'A bit quick. Fine if it sounds natural; the scene speeds up to match.'];
+  if (secs > hi + 1) return ['warn', 'A bit long. The scene slows down to fit, so try a slightly faster read if it drags.'];
+  return ['ok', 'Good length.'];
+};
+
+let lines = [], cur = 0, rec = false, recorder = null, stream = null, t0 = 0, timer = 0;
+const takes = {};          // n → { secs, url, saved }
+const video = $('video');
+
+function showErr(msg) { $('err').textContent = msg; $('err').hidden = !msg; }
+
+async function load() {
+  try {
+    const r = await fetch('/script.json');
+    if (!r.ok) throw new Error('Could not load the script. Record and compose the video first.');
+    const d = await r.json();
+    lines = d.lines;
+    document.getElementById('brand').firstChild.textContent = d.title || 'Demo';
+    document.title = `${d.title || 'Demo'} · voice-over studio`;
+    if (d.voDir) document.getElementById('vodir').textContent = d.voDir;
+    for (const [n] of Object.entries(d.takes)) takes[n] = { secs: null, url: `/take/${n}?v=${Date.now()}`, saved: true };
+    await Promise.all(Object.keys(takes).map((n) => durationOf(takes[n].url).then((s) => (takes[n].secs = s))));
+    const next = lines.findIndex((l) => !takes[l.n]);
+    cur = next === -1 ? 0 : next;
+    render();
+  } catch (e) { showErr(e.message); }
+}
+
+function durationOf(url) {
+  return new Promise((res) => {
+    const a = new Audio();
+    a.preload = 'metadata';
+    a.src = url;
+    a.onloadedmetadata = () => {
+      if (a.duration === Infinity) { a.currentTime = 1e7; a.ontimeupdate = () => { a.ontimeupdate = null; res(a.duration); }; }
+      else res(a.duration);
+    };
+    a.onerror = () => res(null);
+  });
+}
+
+function render() {
+  const l = lines[cur];
+  if (!l) return;
+  const done = Object.keys(takes).length;
+  $('count').textContent = `${done}/${lines.length} recorded`;
+  $('total').textContent = `${lines.length} lines`;
+  $('meta').textContent = `Line ${nn(l.n)} · ${l.words} words · scene ${l.start.toFixed(1)}–${l.end.toFixed(1)} s`;
+  const [lo, hi] = range(l.aim);
+  $('aim').innerHTML = `Aim for <strong>about ${l.aim} seconds</strong> <span>(${lo}–${hi} s is fine)</span>`;
+  $('text').textContent = l.text;
+
+  const c = $('controls');
+  c.innerHTML = '';
+  const t = takes[l.n];
+  if (rec) {
+    c.append(btn(`<span class="dot"></span> Stop`, 'btn rec', stop));
+  } else {
+    c.append(btn(`<span class="dot"></span> ${t ? 'Record again' : 'Record'}`, 'btn ink', start));
+    c.append(btn('▶ Preview scene', 'btn', playScene));
+    if (t) {
+      const a = document.createElement('audio');
+      a.controls = true; a.src = t.url;
+      c.append(a);
+    }
+    c.append(btn('Next line →', 'btn', () => go(1), cur >= lines.length - 1));
+  }
+
+  const v = $('verdict');
+  if (t && t.secs && !rec) {
+    const [tone, text] = fit(t.secs, l.aim);
+    v.className = `verdict ${tone}`;
+    v.textContent = `Your take: ${t.secs.toFixed(1)} s${t.saved ? ' · saved' : ' · saving…'}. ${text}`;
+    v.hidden = false;
+  } else v.hidden = true;
+  $('progress').hidden = !rec;
+
+  const list = $('list');
+  list.innerHTML = '';
+  lines.forEach((x, i) => {
+    const li = document.createElement('li');
+    const b = document.createElement('button');
+    b.className = `item${i === cur ? ' cur' : ''}`;
+    const tk = takes[x.n];
+    b.innerHTML = `<span class="n">${nn(x.n)}</span><span class="t"></span><span class="s${tk ? ' done' : ''}">${tk ? `${tk.secs ? tk.secs.toFixed(0) + 's' : ''} ✓` : `~${x.aim}s`}</span>`;
+    b.querySelector('.t').textContent = x.text;
+    b.onclick = () => { if (!rec) { cur = i; render(); playScene(); } };
+    if (i === cur) requestAnimationFrame(() => b.scrollIntoView({ block: 'nearest' }));
+    li.append(b); list.append(li);
+  });
+}
+
+function btn(html, cls, onClick, disabled = false) {
+  const b = document.createElement('button');
+  b.className = cls; b.innerHTML = html; b.onclick = onClick; b.disabled = disabled;
+  return b;
+}
+
+function go(d) { if (rec) return; cur = Math.max(0, Math.min(lines.length - 1, cur + d)); render(); }
+
+function playScene() {
+  const l = lines[cur];
+  video.currentTime = l.start;
+  video.play().catch(() => {});
+}
+video.addEventListener('timeupdate', () => {
+  const l = lines[cur];
+  if (l && !rec && video.currentTime >= l.end) video.pause();
+});
+
+async function start() {
+  const l = lines[cur];
+  try {
+    stream ??= await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: true, autoGainControl: false, channelCount: 1 } });
+  } catch {
+    return showErr('Microphone access was blocked. Allow it from the address bar, then try again.');
+  }
+  showErr('');
+  const chunks = [];
+  recorder = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus', audioBitsPerSecond: 160000 });
+  recorder.ondataavailable = (e) => e.data.size && chunks.push(e.data);
+  const n = l.n;
+  recorder.onstop = async () => {
+    const secs = (performance.now() - t0) / 1000;
+    const blob = new Blob(chunks, { type: 'audio/webm' });
+    if (takes[n]?.url?.startsWith('blob:')) URL.revokeObjectURL(takes[n].url);
+    takes[n] = { secs, url: URL.createObjectURL(blob), saved: false };
+    render();
+    try {
+      const r = await fetch(`/take/${n}`, { method: 'PUT', body: blob, headers: { 'content-type': 'audio/webm' } });
+      if (!r.ok) throw new Error(await r.text());
+      takes[n].saved = true;
+    } catch (e) { showErr(`Could not save take ${nn(n)}: ${e.message}`); }
+    render();
+  };
+  t0 = performance.now();
+  recorder.start();
+  rec = true;
+  render();
+  const [lo, hi] = range(l.aim);
+  $('mark').style.left = `${(l.aim / (hi + 1)) * 100}%`;
+  timer = setInterval(() => {
+    const el = (performance.now() - t0) / 1000;
+    const f = $('fill');
+    f.style.width = `${Math.min(100, (el / (hi + 1)) * 100)}%`;
+    f.className = el > hi ? 'over' : '';
+    $('hint').textContent = `${el.toFixed(1)} s · ${el > hi ? 'wrap up' : el >= lo ? 'good time to finish' : `target ~${l.aim} s`}`;
+  }, 100);
+  playScene();
+}
+
+function stop() {
+  clearInterval(timer);
+  if (recorder?.state === 'recording') recorder.stop();
+  video.pause();
+  rec = false;
+  render();
+}
+
+window.addEventListener('keydown', (e) => {
+  if (!lines.length || e.target.closest('input,textarea,audio')) return;
+  if (e.code === 'Space') { e.preventDefault(); rec ? stop() : start(); }
+  else if (e.key === 'ArrowRight') go(1);
+  else if (e.key === 'ArrowLeft') go(-1);
+});
+
+load();
+</script>
+</body>
+</html>
