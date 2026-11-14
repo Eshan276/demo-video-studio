@@ -11,14 +11,14 @@ Produces two files from one recording:
 
 Everything is recorded from the real system in a headless Chrome. Title cards, terminal replays and data tables are rendered as HTML in the project's colours, with real values pulled from the system, never mocked.
 
-Scripts live in this skill's `scripts/` folder (call it `$S` below; resolve it to the absolute path of this skill).
+Scripts live in this skill's `scripts/` folder; call it `$S` below. Installed as a plugin, `$S` is `${CLAUDE_PLUGIN_ROOT}/scripts`; installed as a plain skill, it is the `scripts/` folder next to this `SKILL.md` (usually `~/.claude/skills/demo-video-studio/scripts`). Resolve it to an absolute path before running anything.
 
 ## 0. Setup (once per machine)
 
 ```bash
 node --version          # 18+
 ffmpeg -version         # with libass (for subtitles) — `ffmpeg -filters | grep ass`
-npm install --prefix $S # installs puppeteer-core next to kit.mjs
+npm install --prefix ~/.cache/demo-video-studio puppeteer-core   # kit.mjs finds it here; survives plugin updates
 ```
 Chrome or Chromium must be installed; set `CHROME_PATH` if it is not in a standard location. Subtitles use the font in `theme.subtitles.font` (default Noto Sans; check with `fc-list | grep -i "noto sans"` and pick an installed font if missing).
 

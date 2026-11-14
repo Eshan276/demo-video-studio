@@ -23,14 +23,16 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const here = dirname(fileURLToPath(import.meta.url));
-const require = createRequire(resolve(here, 'package.json'));
 
+// puppeteer-core is looked up next to this file, then in a cache that survives plugin updates, then in the project.
+const CACHE = resolve(process.env.HOME ?? process.env.USERPROFILE ?? '.', '.cache', 'demo-video-studio');
 function loadPuppeteer() {
-  try {
-    return require('puppeteer-core');
-  } catch {
-    throw new Error(`puppeteer-core is not installed. Run:  npm install --prefix ${here}`);
+  for (const base of [resolve(here, 'package.json'), resolve(CACHE, 'package.json'), resolve(process.cwd(), 'package.json')]) {
+    try {
+      return createRequire(base)('puppeteer-core');
+    } catch { /* try the next location */ }
   }
+  throw new Error(`puppeteer-core is not installed. Run:  npm install --prefix "${CACHE}" puppeteer-core`);
 }
 
 export function findChrome() {
